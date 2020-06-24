@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from decouple import config
+from helpers import helper
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -50,6 +52,61 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'chatbot.urls'
+
+# For logging
+LOGGER_LIST = ['chatbot',]
+
+LOGGER_CONTENT= {
+            'handlers': ['file_handler','console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+
+# Logging details
+helper.create_dir(os.path.join(BASE_DIR,'logs'))
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'server_format': {
+            # 'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+            #'format': '[%(asctime)s] [%(levelname)s] %(name)s %(user)s_%(session_id)s:-> %(message)s',
+            'format': '[%(asctime)s] [%(levelname)s] [%(name)s] [PID:%(process)d_%(thread)d]--> %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'console_format': {
+            'format': '[%(asctime)s]: %(levelname)s: [%(name)s]-> %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+
+    },
+    'handlers': {
+        'file_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR,'logs','productmatchingserver_rest.log'),
+            'maxBytes': 1024*1024*15,            #15 MB
+            'formatter': 'server_format',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+            'formatter': 'console_format'
+        },
+
+    },
+    'loggers': { logger:LOGGER_CONTENT for logger in LOGGER_LIST}
+}
 
 TEMPLATES = [
     {
@@ -144,3 +201,7 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGIN_REDIRECT_URL = '/'
+# LOGIN_REDIRECT_URL = 'app_home'
+LOGOUT_REDIRECT_URL = '/accounts/login/'

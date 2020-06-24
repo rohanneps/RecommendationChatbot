@@ -1,0 +1,20 @@
+
+{% extends 'base.html' %}
+
+{% block title %}User Login{% endblock %}
+
+{% block content %}
+ <main role="main" class="container">
+      <div class="jumbotron">
+        <div class="card-header"><h1><b>Please Login Below</b></h1></div>
+        <br/><br/>
+
+			<form method="post">
+			  {% csrf_token %}
+			  {{ form.as_p }}
+			  &nbsp;&nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-secondary">Login</button>
+			</form>
+      </div>
+    </main>
+
+{% endblock %}

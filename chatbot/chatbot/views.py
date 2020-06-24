@@ -7,7 +7,10 @@ import random
 from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
-	return render(request, 'home.html')
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(settings.LOGOUT_REDIRECT_URL)
+	else:
+		return render(request, 'home.html')
 
 
 get_random_response = lambda intent:random.choice(intent_response_dict[intent])
