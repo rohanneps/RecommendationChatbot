@@ -27,19 +27,31 @@ function showBotMessage(msg){
              text: msg,
              message_side: 'left'
         });
+        var img_avatar_tag = document.getElementsByTagName("img");
+        var lastSelect = img_avatar_tag[img_avatar_tag.length-1];
+        lastSelect.className = "img_enabled";
         message.draw();
         $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
 }
+
 function showUserMessage(msg){
         $messages = $('.messages');
         message = new Message({
             text: msg,
             message_side: 'right'
         });
+
+
+        var img_avatar_tag = document.getElementsByTagName("img");
+        var lastSelect = img_avatar_tag[img_avatar_tag.length-1];
+        lastSelect.className = "img_disabled";
+
         message.draw();
         $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
         $('#msg_input').val('');
 }
+
+
 function sayToBot(text){
     document.getElementById("msg_input").placeholder = "Type your messages here..."
     $.post("/chat",
