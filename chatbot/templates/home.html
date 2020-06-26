@@ -28,14 +28,24 @@ CHAT | HOME
                                      <div class="text">send</div>
                                 </div>
                             </div>
+                            <div class="bottom_wrapper image_upload" style='display:none; margin-left: 25%'>
+                                <a href="#" data-toggle="tooltip" data-placement="top" title="Upload an image">
+                                    <label for="upload-photo" id='image_upload'>Upload Image</label>
+                                    
+                                </a>
+                                <input type="file" id="image-input">
+                            </div>
                         </div>
                         <div class="message_template">
                             <li class="message">
                                 <div class="avatar">
-                                    <img id='bot_avatar' src='{% static "img/bot.png" %}' heigth='20' width='70'>
+                                    <img id='bot_avatar' src='{% static "img/bot.png" %}' heigth='20' width='70' class='bot_avatar'>
                                 </div>
                                 <div class="text_wrapper">
                                     <div class="text"></div>
+                                </div>
+                                <div class="image_wrapper" style='display:none; margin-left:40%'>
+                                    <img id='search_image_preview' src='{% static "img/bot.png" %}' heigth='60' width='100' class='user_images'>
                                 </div>
                             </li>
                         </div>
@@ -47,4 +57,5 @@ CHAT | HOME
 
 {% block other_footers %}
 <script src='{% static "js/bind.js" %}'></script>
+<script src='{% static "js/image_handler.js" %}'></script>
 {% endblock %}

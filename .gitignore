@@ -6,3 +6,9 @@
 **/static_cdn
 .env
 **/env
+**/*.jpeg
+**/*.jpg
+**/*.png
+**/*.log
+**/logs
+**/media

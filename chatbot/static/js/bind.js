@@ -28,10 +28,18 @@ function showBotMessage(msg){
              message_side: 'left'
         });
         var img_avatar_tag = document.getElementsByTagName("img");
-        var lastSelect = img_avatar_tag[img_avatar_tag.length-1];
+        // -2 as last image is upload image
+        var lastSelect = img_avatar_tag[img_avatar_tag.length-2];
         lastSelect.className = "img_enabled";
         message.draw();
         $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+}
+
+
+function disableBotAvatar(){
+    var img_avatar_tag = document.getElementsByTagName("img");
+    var lastSelect = img_avatar_tag[img_avatar_tag.length-2];
+    lastSelect.className = "img_disabled";
 }
 
 function showUserMessage(msg){
@@ -40,11 +48,10 @@ function showUserMessage(msg){
             text: msg,
             message_side: 'right'
         });
-
-
-        var img_avatar_tag = document.getElementsByTagName("img");
-        var lastSelect = img_avatar_tag[img_avatar_tag.length-1];
-        lastSelect.className = "img_disabled";
+        disableBotAvatar();
+        // var img_avatar_tag = document.getElementsByTagName("img");
+        // var lastSelect = img_avatar_tag[img_avatar_tag.length-2];
+        // lastSelect.className = "img_disabled";
 
         message.draw();
         $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
@@ -63,7 +70,16 @@ function sayToBot(text){
                 if(jsondata["status"]=="success"){
                     response=jsondata["response"];
 
-                    if(response){showBotMessage(response);}
+                    if(response){
+                        showBotMessage(response);
+                        if(response=="Sorry I am not trained to do that yet..."){
+                            // handle for image upload
+                            // console.log(response);
+                            // console.log('cat');
+                            hideTextBox()
+                            showImageUploadOption()
+                        }
+                    }
                 }
             });
 
@@ -98,3 +114,6 @@ $('.message_input').keyup(function (e) {
     $('.message_input').val('') ;}
     }
 });
+
+
+

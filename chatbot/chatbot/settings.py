@@ -93,7 +93,7 @@ LOGGING = {
         'file_handler': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR,'logs','productmatchingserver_rest.log'),
+            'filename': os.path.join(BASE_DIR,'logs','chatbot.log'),
             'maxBytes': 1024*1024*15,            #15 MB
             'formatter': 'server_format',
         },
@@ -205,3 +205,8 @@ TEMPLATES = [
 LOGIN_REDIRECT_URL = '/'
 # LOGIN_REDIRECT_URL = 'app_home'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+MEDIA_ROOT = 'media'
+MEDIA_URL = '/media/'
+
+helper.create_dir(os.path.join(BASE_DIR, MEDIA_ROOT))
