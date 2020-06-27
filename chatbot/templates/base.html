@@ -34,11 +34,10 @@
 
 
           </ul>
-          <!-- <ul class="nav navbar-nav ml-auto"> -->
             <ul class='nav'>
           {% if user.is_authenticated %}
                 <li class="nav-item navbar-right dropdown active">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style='color: #FFFFFF'>
                       {{ user.username }}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">

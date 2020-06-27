@@ -4,27 +4,35 @@ $('input[type="file"]').on('change', function () {
     image_file_name = photo.name
 	let formData = new FormData();
 	formData.append("photo", photo);
-	sessionStorage.setItem("image_file_name", image_file_name);
-	$.ajax({
-	    url : "/upload_image",
-	    type: "POST",
-	    data : formData,
-	    processData: false,
-	    contentType: false,
-    success:function(data, textStatus, jqXHR){
-	    if (data == 'Incorrect FileFormat'){
-	    	$.ajax({
-	    	url : "/upload_image",
-	    	type: "GET",
-	    });
-	    }
-    },
-    error: function(jqXHR, textStatus, errorThrown){
-        //if fails    
-        // console.log(errorThrown)
+    // console.log(photo)
+    // File extension check
+
+    if(photo != null && isImageFile(image_file_name)) {
+        // console.log('Session variable saved')
+    	sessionStorage.setItem("image_file_name", image_file_name);
+    	$.ajax({
+    	    url : "/upload_image",
+    	    type: "POST",
+    	    data : formData,
+    	    processData: false,
+    	    contentType: false,
+        success:function(data, textStatus, jqXHR){
+    	    if (data == 'Incorrect FileFormat'){
+    	    	$.ajax({
+    	    	url : "/upload_image",
+    	    	type: "GET",
+    	    });
+    	    }
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            //if fails    
+            // console.log(errorThrown)
+        }
+    		});
+    		// console.log('Calling Ajx')
+    }else{
+        sessionStorage.setItem("image_file_name", null);
     }
-		});
-		// console.log('Calling Ajx')
 });
 
 // Tool-tip
@@ -32,17 +40,29 @@ $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();   
 });
 
-
+// Check Image File Extension 
+function isImageFile(file_name){
+        var image_file_extensions = ['jpg','png','jpeg'];
+        var file_extension = file_name.split('.');
+        file_extension = file_extension[file_extension.length-1];
+        return image_file_extensions.includes(file_extension.toLowerCase());
+}
 
 // on click image upload link
 $('.image_upload').click(function (e) {
     	
  	  	// Show last image box
-        showUserImageMessage();
-        console.log('Showing User Image')
-        sayToBot('Image Provided');
-        showTextBox();
-        hideImageUploadOption();
+        user_image_file_name = sessionStorage.getItem("image_file_name"); 
+        if (user_image_file_name != null && isImageFile(image_file_name)){
+            // when user image is provided
+            showUserImageMessage();
+            console.log('Showing User Image')
+            sayToBot('Image Provided');
+            showTextBox();
+            hideImageUploadOption();
+    }else{
+        sayToBot('Image not provided');
+    }
 });
 
 // New Image Message Instance

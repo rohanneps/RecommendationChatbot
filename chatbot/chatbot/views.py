@@ -34,6 +34,10 @@ def chat(requests):
 
 			elif user_message == 'start':
 				return JsonResponse({'status':'success','response':'Processing Starting. We will inform you once completed'})
+			
+			elif user_message == 'Image not provided':
+				return JsonResponse({'status':'success','response':'Please provide an image to continue. Applicable exntesions are png, jpg, jpeg'})
+			
 			else:
 				response = rq.get('http://localhost:5000/parse',params={'q':user_message})
 				response = response.json()
@@ -63,21 +67,23 @@ def upload_image(request):
 	"""
 	Handle Image Upload using post request
 	"""
-	if requests.method == 'POST':
+	if request.FILES:
 		current_timestamp = time.strftime('%y%m%d-%H%M%S')
 		for files in request.FILES:
 			#open(settings.BASE_DIR + '/media/' + str(request.FILES[files]), 'wb')
 			# file_name = current_timestamp+'_'+str(request.FILES[files])
 			file_name = str(request.FILES[files])
-			print(file_name)
-			file_name_ext = file_name.split('.')[-1]
-			if file_name_ext.lower() not in ['jpg','jpeg','png']:
-				print('Incorrect FileFormat')
-				return 'Incorrect FileFormat'
+			if file_name:
+				# there is image upload
+				file_name_ext = file_name.split('.')[-1]
+				print(file_name_ext)
+				if file_name_ext.lower() not in ['jpg','jpeg','png']:
+					print('Incorrect FileFormat')
+					return 'Incorrect FileFormat'
 
-			file_name_path = os.path.join(settings.MEDIA_ROOT,file_name)
-			with open(file_name_path, 'wb') as destination:
-				for file_chunk in request.FILES[files].chunks():
-					print(file_name_path)
-					destination.write(file_chunk) 
-
+				file_name_path = os.path.join(settings.MEDIA_ROOT,file_name)
+				with open(file_name_path, 'wb') as destination:
+					for file_chunk in request.FILES[files].chunks():
+						print(file_name_path)
+						destination.write(file_chunk) 
+				return 'Success'
