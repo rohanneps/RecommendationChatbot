@@ -1,4 +1,3 @@
-var data=[];
 
 function addBr(text){
     return text.replace(/\n/g, "<br />");
@@ -67,12 +66,14 @@ function sayToBot(text){
                 text:text,
             },
             function(jsondata, status){
+                // console.log(jsondata)
                 if(jsondata["status"]=="success"){
                     response=jsondata["response"];
 
                     if(response){
                         showBotMessage(response);
-                        if(response=="Sorry I am not trained to do that yet..."){
+                        // console.log(response)
+                        if(response.search('now please provide an image')!= -1){
                             // handle for image upload
                             // console.log(response);
                             // console.log('cat');

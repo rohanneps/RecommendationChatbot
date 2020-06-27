@@ -1,13 +1,21 @@
 // Image Upload using Ajax
 $('input[type="file"]').on('change', function () {
     let photo = document.getElementById("image-input").files[0];
-    image_file_name = photo.name
-	let formData = new FormData();
-	formData.append("photo", photo);
     // console.log(photo)
+
+    // File Name run time modification
+    new_photo_name = getCurrentDateTime()+'_'+photo.name
+    var blob = photo.slice(0, photo.size); 
+    new_photo = new File([blob], new_photo_name);
+    image_file_name = new_photo.name
+
+    // Form data for post request
+	let formData = new FormData();
+	formData.append("photo", new_photo);
+
     // File extension check
 
-    if(photo != null && isImageFile(image_file_name)) {
+    if(new_photo != null && isImageFile(image_file_name)) {
         // console.log('Session variable saved')
     	sessionStorage.setItem("image_file_name", image_file_name);
     	$.ajax({
@@ -17,6 +25,7 @@ $('input[type="file"]').on('change', function () {
     	    processData: false,
     	    contentType: false,
         success:function(data, textStatus, jqXHR){
+            // console.log(data)
     	    if (data == 'Incorrect FileFormat'){
     	    	$.ajax({
     	    	url : "/upload_image",
@@ -48,8 +57,12 @@ function isImageFile(file_name){
         return image_file_extensions.includes(file_extension.toLowerCase());
 }
 
+function getCurrentDateTime(){
+    var d = new Date()
+    return d.getUTCFullYear()+d.getUTCMonth()+d.getDate()+'-'+d.getHours()+d.getMinutes()+d.getSeconds()
+}
 // on click image upload link
-$('.image_upload').click(function (e) {
+$('#image_upload').click(function (e) {
     	
  	  	// Show last image box
         user_image_file_name = sessionStorage.getItem("image_file_name"); 
@@ -98,9 +111,9 @@ function showUserImageMessage(){
         // Assign user image
         var img_tags = document.getElementsByTagName('img')
         user_image_file_name = sessionStorage.getItem("image_file_name"); 
-        console.log(user_image_file_name)
+        // console.log(user_image_file_name)
         // assigning user image to last img_tag
-        console.log(img_tags)
+        // console.log(img_tags)
         img_tags[img_tags.length-3].src = "/media/"+ user_image_file_name;
 
         // Enable user message chat

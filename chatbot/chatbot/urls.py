@@ -21,9 +21,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('chat', views.chat, name='chat'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('', views.home, name='home'),
+    path('chat', views.bot_response, name='bot_response'),
     path('upload_image', views.upload_image, name='upload_image'),
 ]
 

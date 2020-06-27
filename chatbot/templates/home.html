@@ -22,7 +22,7 @@ CHAT | HOME
                             <ul class="messages"></ul>
                             <div class="bottom_wrapper clearfix">
                                 <div class="message_input_wrapper">
-                                    <input id="msg_input" class="message_input" placeholder="Say Hi to begin chat..." />
+                                    <input id="msg_input" class="message_input" placeholder="Say Hi to begin chat..." data-toggle="tooltip" data-placement="top" title="Type clear to clear search operation before start"/>
                                 </div>
                                 <div class="send_message">
                                      <div class="text">send</div>
@@ -31,9 +31,8 @@ CHAT | HOME
                             <div class="bottom_wrapper image_upload" style='display:none; margin-left: 25%'>
                                 <a href="#" data-toggle="tooltip" data-placement="top" title="Upload an image">
                                     <label for="upload-photo" id='image_upload'>Upload Image</label>
-                                    
                                 </a>
-                                <input type="file" id="image-input">
+                                <input type="file" id="image-input" class="form-control-file" >
                             </div>
                         </div>
                         <div class="message_template">
