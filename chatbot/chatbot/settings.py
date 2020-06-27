@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'recommendation'
 ]
 
 MIDDLEWARE = [
@@ -51,10 +52,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
 ROOT_URLCONF = 'chatbot.urls'
 
 # For logging
-LOGGER_LIST = ['chatbot',]
+LOGGER_LIST = ['chatbot','recommendation']
 
 LOGGER_CONTENT= {
             'handlers': ['file_handler','console'],

@@ -35,7 +35,7 @@ $('input[type="file"]').on('change', function () {
         },
         error: function(jqXHR, textStatus, errorThrown){
             //if fails    
-            // console.log(errorThrown)
+            console.log(errorThrown)
         }
     		});
     		// console.log('Calling Ajx')

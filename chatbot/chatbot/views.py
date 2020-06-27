@@ -5,10 +5,9 @@ from django.conf import settings
 from helpers.engine import *
 import random
 from django.views.decorators.csrf import csrf_exempt
-import time
 import os
 import logging
-
+from recommendation.models import Process, get_initiated_user_process
 
 comp_logger = logging.getLogger(__name__)
 
@@ -76,7 +75,9 @@ def intialize_session_variables(requests):
 
 	if 'user_search_term' not in requests.session:
 		requests.session['user_search_term'] = None
+
 	return requests
+
 
 @csrf_exempt
 def bot_response(requests):
@@ -88,11 +89,10 @@ def bot_response(requests):
 		comp_logger.info(requests.POST)
 		post_data = requests.POST
 		user_message = post_data['text'].lower()
-		comp_logger.info('user: {}'.format(user_message))
+		comp_logger.info('user: message: {}'.format(user_message))
 		
 		response_text = None
 		requests = intialize_session_variables(requests)
-
 		if user_message in ['clear','no','stop','restart','pause','halt','terminate','end', 'close', 'exit']:
 			if 'user_stage' in requests.session:
 				requests.session['user_stage'] = 0
@@ -102,16 +102,14 @@ def bot_response(requests):
 
 			response_text = 'Search Operation {}.'.format(user_message)
 
-		comp_logger.info('user: user_stage: {}'.format(requests.session['user_stage']))
-		comp_logger.info('user: user_process_running: {}'.format(requests.session['user_process_running']))
+
+		user_stage = requests.session['user_stage']
+		user_process_running = requests.session['user_process_running']
+
+		comp_logger.info('user: user_stage: {}'.format(user_stage))
+		comp_logger.info('user: user_process_running: {}'.format(user_process_running))
 
 		if not response_text:
-			user_stage = requests.session['user_stage']
-			user_process_running = requests.session['user_process_running']
-
-			# if user_message == 'image provided':
-			# 	response_text = 'Type start to begin'
-
 			if user_message == 'image not provided':
 				response_text = 'Please provide an image to continue. Applicable exntesions are png, jpg, jpeg'
 
@@ -129,6 +127,14 @@ def bot_response(requests):
 				else:
 					response_text = 'Processing Starting. We will inform you once completed'
 					requests.session['user_process_running'] = True
+					# call process here
+
+					# Assign image filename for currect process run
+					user_process_list = get_initiated_user_process(requests.user)
+					user_recom_process = user_process_list[0]
+					user_recom_process.search_query = requests.session['user_search_term']
+					user_recom_process.initiated = True
+					user_recom_process.save()
 
 			elif not user_process_running :
 				if user_message == 'image provided':
@@ -152,29 +158,39 @@ def bot_response(requests):
 
 
 @csrf_exempt
-def upload_image(request):
+def upload_image(requests):
 	"""
-	Handle Image Upload using post request
+	Handle Image Upload using post requests
 	"""
-	if request.FILES:
-		current_timestamp = time.strftime('%y%m%d-%H%M%S')
-		for files in request.FILES:
-			#open(settings.BASE_DIR + '/media/' + str(request.FILES[files]), 'wb')
-			# file_name = current_timestamp+'_'+str(request.FILES[files])
-			file_name = str(request.FILES[files])
+	if requests.FILES:
+		for files in requests.FILES:
+			file_name = str(requests.FILES[files])
 			if file_name:
-				# there is image upload
 				file_name_ext = file_name.split('.')[-1]
-				print(file_name_ext)
 				if file_name_ext.lower() not in ['jpg','jpeg','png']:
-					print('Incorrect FileFormat')
+					# print('Incorrect FileFormat')
 					return 'Incorrect FileFormat'
 
 				file_name_path = os.path.join(settings.MEDIA_ROOT,file_name)
+				# Assign image filename for currect process run
+				comp_logger.info(file_name_path)
+				user_process_list = get_initiated_user_process(requests.user)
+
+				if len(user_process_list) == 0:
+					user_recom_process = Process(
+											user=requests.user,
+											search_image=file_name_path
+											)
+				else:
+					user_recom_process = user_process_list[0]
+					user_recom_process.search_image = file_name_path
+				user_recom_process.save()
+				comp_logger.info(user_recom_process.save())
+									
 				with open(file_name_path, 'wb') as destination:
-					for file_chunk in request.FILES[files].chunks():
-						print(file_name_path)
-						destination.write(file_chunk) 
+					for file_chunk in requests.FILES[files].chunks():
+						# print(file_name_path)
+						destination.write(file_chunk)
 				return 'Success'
 	else:
 		return HttpResponseRedirect(reverse('home'))

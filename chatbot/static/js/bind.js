@@ -66,7 +66,7 @@ function sayToBot(text){
                 text:text,
             },
             function(jsondata, status){
-                // console.log(jsondata)
+                console.log(jsondata)
                 if(jsondata["status"]=="success"){
                     response=jsondata["response"];
 
