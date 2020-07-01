@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import logging
 from recommendation.models import Process, get_initiated_user_process
+from recommendation.async_task import start_async_background_recommendation
+
 
 comp_logger = logging.getLogger(__name__)
 
@@ -18,7 +20,7 @@ def home(request):
 		return render(request, 'home.html')
 
 
-get_random_response = lambda intent:random.choice(intent_response_dict[intent])
+# get_random_response = lambda intent:random.choice(intent_response_dict[intent])
 
 # @csrf_exempt
 # def bot_response(requests):
@@ -79,6 +81,11 @@ def intialize_session_variables(requests):
 	return requests
 
 
+def get_projects_inprogress():
+	active_projects = Project.objects.filter(status='InProgress').order_by('-id')
+	return active_projects
+
+	
 @csrf_exempt
 def bot_response(requests):
 	"""
@@ -86,7 +93,7 @@ def bot_response(requests):
 	"""
 
 	if requests.method == 'POST':
-		comp_logger.info(requests.POST)
+		# comp_logger.info(requests.POST)
 		post_data = requests.POST
 		user_message = post_data['text'].lower()
 		comp_logger.info('user: message: {}'.format(user_message))
@@ -125,13 +132,20 @@ def bot_response(requests):
 				elif user_process_running :
 					response_text = 'Processing already underway.'
 				else:
+					comp_logger.info('here')
 					response_text = 'Processing Starting. We will inform you once completed'
 					requests.session['user_process_running'] = True
 					# call process here
-
 					# Assign image filename for currect process run
 					user_process_list = get_initiated_user_process(requests.user)
 					user_recom_process = user_process_list[0]
+					comp_logger.info(user_recom_process)
+					user_recom_process_id = user_recom_process.id
+					# calling async task
+					comp_logger.info(user_recom_process_id)
+					comp_logger.info('calling async task handler for recommendation id:{}'.format(user_recom_process_id))
+					start_async_background_recommendation.delay(user_recom_process_id=user_recom_process_id)
+
 					user_recom_process.search_query = requests.session['user_search_term']
 					user_recom_process.initiated = True
 					user_recom_process.save()
@@ -175,7 +189,6 @@ def upload_image(requests):
 				# Assign image filename for currect process run
 				comp_logger.info(file_name_path)
 				user_process_list = get_initiated_user_process(requests.user)
-
 				if len(user_process_list) == 0:
 					user_recom_process = Process(
 											user=requests.user,

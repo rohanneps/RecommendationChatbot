@@ -213,3 +213,61 @@ MEDIA_ROOT = 'media'
 MEDIA_URL = '/media/'
 
 helper.create_dir(os.path.join(BASE_DIR, MEDIA_ROOT))
+
+
+# CELERY SETTINGS
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
+### Process ########################
+BASE_DIR = os.getcwd()
+
+PROCESS_FOLDER = os.path.join(BASE_DIR, 'process')
+IMAGES_FOLDER =  'images'
+PAGE_SOURCE_FOLDER = 'page_sources'
+
+SOURCE_IMAGE_PATH = os.path.join(IMAGES_FOLDER, 'source_image.jpeg')
+IMAGE_FILE_NAME_FORMAT = '{}.jpeg'
+
+RECOMMEDATION_HTML_FILE = 'recommendation.html'
+RECOMMENDATION_SCREENSHOT =  'recom.png'
+########################################
+
+
+## MARKET PLACE DETAILS ######################################
+
+AMAZON_PAGE_SOURCE = 'amazon.html'
+EBAY_PAGE_SOURCE = 'ebay.html'
+GOOGLE_PAGE_SOURCE = 'google.html'
+WALMART_PAGE_SOURCE = 'walmart.html'
+####################################
+
+
+GECKO_DRIVER_PATH = os.path.join('bin', 'geckodriver')
+
+### SERP URL #########################
+
+AMAZON_SERP_QUERY_STRING =  "https://www.amazon.com.au/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords={}"
+GOOGLE_SERP_QUERY_STRING = "https://www.google.com/search?output=search&tbm=shop&tbs=vw:l&q={}"
+EBAY_SERP_QUERY_STRING = "https://www.ebay.com.au/sch/i.html?_nkw={}"
+WALMART_SERP_QUERY_STRING = "https://www.walmart.com/search/?query={}"
+
+
+######################################
+
+
+### SERP DETAILS #####################
+MAX_SERP_LIST_COUNT = 10
+
+SERP_PRODUCT_CATALOG_HEADERS = ['Name','Url','Image','Price','Platform']
+TOP_N_PICKS = 3
+######################################
+
+### SIMILARITY PROCESS######################
+IMAGE_WEIGHTAGE = 2
+TEXT_WEIGHTAGE = 1
+#####################################
+

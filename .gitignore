@@ -12,3 +12,7 @@
 **/*.log
 **/logs
 **/media
+**/process
+**/process/*
+**/bin/*
+**/migrations
