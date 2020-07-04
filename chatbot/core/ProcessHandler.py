@@ -42,8 +42,8 @@ class ProcessHandler(object):
 		self.search_image = os.path.join(settings.BASE_DIR, self.project.search_image)
 		self.project_dir = os.path.join(settings.PROCESS_FOLDER, str(self.project_id))
 
-		self.recommended_html = os.path.join(self.project_dir, settings.RECOMMEDATION_HTML_FILE)
-		self.recommended_html_screenshot = os.path.join(self.project_dir, settings.RECOMMENDATION_SCREENSHOT)
+		self.recommendation_html_file_path = os.path.join(self.project_dir, settings.RECOMMEDATION_HTML_FILE)
+		self.recommendation_html_screenshot = os.path.join(self.project_dir, settings.RECOMMENDATION_SCREENSHOT)
 		self.image_dir = os.path.join(self.project_dir, settings.IMAGES_FOLDER)
 		self.page_source_dir = os.path.join(self.project_dir, settings.PAGE_SOURCE_FOLDER)
 
@@ -94,9 +94,11 @@ class ProcessHandler(object):
 		comp_logger.info('Getting Ebay Details')
 		ebay_file_path = os.path.join(self.page_source_dir, settings.EBAY_PAGE_SOURCE)
 		ebay_page_source = self.driver_get_page_source(ebay_q_string, ebay_file_path)
-		ebay_catalog_df = getEbaySerpCatalog(ebay_page_source, settings.SERP_PRODUCT_CATALOG_HEADERS)
-		self.catalog_df = self.catalog_df.append(ebay_catalog_df)
-
+		try:
+			ebay_catalog_df = getEbaySerpCatalog(ebay_page_source, settings.SERP_PRODUCT_CATALOG_HEADERS)
+			self.catalog_df = self.catalog_df.append(ebay_catalog_df)
+		except:
+			pass
 		# to do for walmart
 
 		comp_logger.info('Writing Merged File')
@@ -138,12 +140,12 @@ class ProcessHandler(object):
 
 	def generate_html_response(self):
 		comp_logger.info('Generating System Response')
-		get_html_from_dataframe(self.catalog_df, self.query, self.recommended)
+		get_html_from_dataframe(self.catalog_df, self.query, self.recommendation_html_file_path)
 		self.get_html_screenshot()
 
 	def get_html_screenshot(self):
-		self.driver.get('file://'+ os.path.join(settings.BASE_DIR, self.recommended_html_screenshot))
-		self.driver.save_screenshot(settings.RECOMMENDATION_SCREENSHOT)
+		self.driver.get('file://'+ os.path.join(settings.BASE_DIR, self.recommendation_html_file_path))
+		self.driver.save_screenshot(self.recommendation_html_screenshot)
 
 
 	def generate_top_n_picks(self):

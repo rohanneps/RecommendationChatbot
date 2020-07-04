@@ -27,7 +27,7 @@ SECRET_KEY = 'ucsw^+169v9u29ip4x@n+t8gknapg0!7ur&p-1m0luv^uj1f14'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'recommendation'
+    'recommendation',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -49,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
@@ -128,7 +129,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'chatbot.wsgi.application'
-
+ASGI_APPLICATION = "chatbot.routing.application" 
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -206,7 +207,6 @@ TEMPLATES = [
 ]
 
 LOGIN_REDIRECT_URL = '/'
-# LOGIN_REDIRECT_URL = 'app_home'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 MEDIA_ROOT = 'media'
@@ -220,6 +220,17 @@ BROKER_URL = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# For django channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            # "hosts": [("127.0.0.1", 6379)],
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
+    },
+}
 
 
 ### Process ########################

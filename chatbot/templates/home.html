@@ -28,6 +28,7 @@ CHAT | HOME
                                      <div class="text">send</div>
                                 </div>
                             </div>
+
                             <div class="bottom_wrapper image_upload" style='display:none; margin-left: 25%'>
                                 <a href="#" data-toggle="tooltip" data-placement="top" title="Upload an image">
                                     <label for="upload-photo" id='image_upload'>Upload Image</label>
@@ -35,6 +36,7 @@ CHAT | HOME
                                 <input type="file" id="image-input" class="form-control-file" >
                             </div>
                         </div>
+                        {% autoescape on %}
                         <div class="message_template">
                             <li class="message">
                                 <div class="avatar">
@@ -48,6 +50,7 @@ CHAT | HOME
                                 </div>
                             </li>
                         </div>
+                        {% endautoescape %}
                     </div>
                 </div>
             </div>
@@ -55,6 +58,6 @@ CHAT | HOME
 {% endblock %}
 
 {% block other_footers %}
-<script src='{% static "js/bind.js" %}'></script>
+
 <script src='{% static "js/image_handler.js" %}'></script>
 {% endblock %}

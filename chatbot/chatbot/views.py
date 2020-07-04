@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import logging
 from recommendation.models import Process, get_initiated_user_process
-from recommendation.async_task import start_async_background_recommendation
+from recommendation.async_task import start_background_recommendation
 
 
 comp_logger = logging.getLogger(__name__)
@@ -141,14 +141,14 @@ def bot_response(requests):
 					user_recom_process = user_process_list[0]
 					comp_logger.info(user_recom_process)
 					user_recom_process_id = user_recom_process.id
-					# calling async task
-					comp_logger.info(user_recom_process_id)
-					comp_logger.info('calling async task handler for recommendation id:{}'.format(user_recom_process_id))
-					start_async_background_recommendation.delay(user_recom_process_id=user_recom_process_id)
-
 					user_recom_process.search_query = requests.session['user_search_term']
 					user_recom_process.initiated = True
+					# user_recom_process.status = 'InProgress'
 					user_recom_process.save()
+
+					# calling async task
+					comp_logger.info('calling async task handler for recommendation id:{}'.format(user_recom_process_id))
+					start_background_recommendation.delay(user_recom_process_id=user_recom_process_id)
 
 			elif not user_process_running :
 				if user_message == 'image provided':
@@ -192,7 +192,8 @@ def upload_image(requests):
 				if len(user_process_list) == 0:
 					user_recom_process = Process(
 											user=requests.user,
-											search_image=file_name_path
+											search_image=file_name_path,
+											status='Pending'
 											)
 				else:
 					user_recom_process = user_process_list[0]
