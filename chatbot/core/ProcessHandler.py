@@ -104,7 +104,7 @@ class ProcessHandler(object):
 		comp_logger.info('Writing Merged File')
 
 	def save_merged_platformat_file(self):
-		self.catalog_df.to_csv(os.path.join(self.project_dir, 'merged.tsv'), index=False,sep='\t')
+		self.catalog_df.to_csv(os.path.join(self.project_dir, settings.RECOMMENDATION_MERGED), index=False,sep='\t')
 
 
 	def clean_resource():
@@ -179,9 +179,10 @@ class ProcessHandler(object):
 			self.catalog_df['serp_weightage'] = self.catalog_df['image_similarity_weightage'] + self.catalog_df['text_match_weightage']
 			self.catalog_df.sort_values(by=['serp_weightage'], ascending=False, inplace=True)
 
-			self.generate_html_response()
-			self.generate_top_n_picks()
+			# self.generate_html_response()
+			# self.generate_top_n_picks()
 			self.save_merged_platformat_file()
+			comp_logger.info('Process completed for: {}'.format(self.project_id))
 		else:
 			comp_logger.info('No Results')
 

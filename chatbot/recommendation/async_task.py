@@ -33,9 +33,9 @@ def start_background_recommendation(self, user_recom_process_id):
 	try:
 		process_handler.main()
 
-		# send task completed message
+		# send task completed message on sucess
 		channel_layer = get_channel_layer()
-		bot_message = 'Task completed. Please link on this <a href=\'www.google.com\'>link</a> to view.'
+		bot_message = 'Task completed. Please link on this <a href=\'recommendation/details/{}/\'>link</a> to view.'.format(user_recom_process_id)
 		channel_user_id = user_recom_process_obj.user.id
 		# Trigger bot message to user
 		async_to_sync(channel_layer.group_send)(

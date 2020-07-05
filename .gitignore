@@ -16,3 +16,4 @@
 **/process/*
 **/bin/*
 **/migrations
+**/celerybeat-schedule

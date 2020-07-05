@@ -25,6 +25,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('chat', views.bot_response, name='bot_response'),
     path('upload_image', views.upload_image, name='upload_image'),
+    path('recommendation/', include('recommendation.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

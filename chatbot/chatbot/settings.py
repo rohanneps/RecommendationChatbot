@@ -244,7 +244,8 @@ SOURCE_IMAGE_PATH = os.path.join(IMAGES_FOLDER, 'source_image.jpeg')
 IMAGE_FILE_NAME_FORMAT = '{}.jpeg'
 
 RECOMMEDATION_HTML_FILE = 'recommendation.html'
-RECOMMENDATION_SCREENSHOT =  'recom.png'
+RECOMMENDATION_SCREENSHOT =  'recomm.png'
+RECOMMENDATION_MERGED = 'recomm.tsv'
 ########################################
 
 
@@ -274,7 +275,7 @@ WALMART_SERP_QUERY_STRING = "https://www.walmart.com/search/?query={}"
 MAX_SERP_LIST_COUNT = 10
 
 SERP_PRODUCT_CATALOG_HEADERS = ['Name','Url','Image','Price','Platform']
-TOP_N_PICKS = 3
+TOP_N_PICKS = 10
 ######################################
 
 ### SIMILARITY PROCESS######################
