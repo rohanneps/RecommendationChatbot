@@ -23,7 +23,7 @@ def start_background_recommendation(self, user_recom_process_id):
 	comp_logger.info('Initiating Recommendation Sequece for id:{}'.format(user_recom_process_id))
 	user_recom_process_obj = Process.objects.get(id=user_recom_process_id)
 
-
+	# for async task termination
 	# project_status = ProjectStatus.objects.get(project=project)
 	# async_task_id = self.request.id
 	# project_status.asynctask_id = async_task_id
@@ -37,6 +37,9 @@ def start_background_recommendation(self, user_recom_process_id):
 		channel_layer = get_channel_layer()
 		bot_message = 'Task completed. Please link on this <a href=\'recommendation/details/{}/\'>link</a> to view.'.format(user_recom_process_id)
 		channel_user_id = user_recom_process_obj.user.id
+		# Task completed
+		comp_logger.info('Updating project status as completed for id:{}'.format(user_recom_process_id))
+		process_handler.update_project_status('Completed')
 		# Trigger bot message to user
 		async_to_sync(channel_layer.group_send)(
 			str(channel_user_id),  # Channel Name, Should always be string
@@ -51,3 +54,4 @@ def start_background_recommendation(self, user_recom_process_id):
 		comp_logger.info(traceback_error)
 		process_handler.update_project_status('Failed', str(e))
 
+	comp_logger.info('Completed Recommendation Sequece for id:{}'.format(user_recom_process_id))

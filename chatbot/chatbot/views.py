@@ -7,7 +7,7 @@ import random
 from django.views.decorators.csrf import csrf_exempt
 import os
 import logging
-from recommendation.models import Process, get_initiated_user_process
+from recommendation.models import Process, get_initiated_user_process, get_inprogress_user_process
 from recommendation.async_task import start_background_recommendation
 
 
@@ -85,7 +85,18 @@ def get_projects_inprogress():
 	active_projects = Project.objects.filter(status='InProgress').order_by('-id')
 	return active_projects
 
+def clear_request_session(requests):
+	if 'user_stage' in requests.session:
+		requests.session['user_stage'] = 0
 	
+	if 'user_process_running' in requests.session:
+		requests.session['user_process_running'] = False
+	
+	if 'user_search_term' in requests.session:
+		requests.session['user_search_term'] = None
+	
+	return requests
+
 @csrf_exempt
 def bot_response(requests):
 	"""
@@ -100,13 +111,9 @@ def bot_response(requests):
 		
 		response_text = None
 		requests = intialize_session_variables(requests)
-		if user_message in ['clear','no','stop','restart','pause','halt','terminate','end', 'close', 'exit']:
-			if 'user_stage' in requests.session:
-				requests.session['user_stage'] = 0
-				requests.session['user_process_running'] = False
-			if 'user_search_term' in requests.session:
-				requests.session['user_search_term'] = None
 
+		if user_message in ['clear','no','stop','restart','pause','halt','terminate','end', 'close', 'exit']:
+			requests = clear_request_session(requests)
 			response_text = 'Search Operation {}.'.format(user_message)
 
 
@@ -116,6 +123,16 @@ def bot_response(requests):
 		comp_logger.info('user: user_stage: {}'.format(user_stage))
 		comp_logger.info('user: user_process_running: {}'.format(user_process_running))
 
+		user_inprogress_process = len(get_inprogress_user_process(requests.user))
+		comp_logger.info('user: user_inprogress_process: {}'.format(user_inprogress_process))
+		# clear session after task completion
+
+		if requests.session['user_stage']==3 and user_process_running==True and user_inprogress_process==0:
+			comp_logger.info('Session clearing after task completion.')
+			requests = clear_request_session(requests)
+			user_stage = requests.session['user_stage']
+			user_process_running = requests.session['user_process_running']
+		
 		if not response_text:
 			if user_message == 'image not provided':
 				response_text = 'Please provide an image to continue. Applicable exntesions are png, jpg, jpeg'
@@ -129,8 +146,8 @@ def bot_response(requests):
 			elif user_message == 'start':
 				if requests.session['user_stage'] !=3:
 					response_text = 'Please provide search query and image first'
-				elif user_process_running :
-					response_text = 'Processing already underway.'
+				elif user_process_running or user_inprogress_process!=0 :
+					response_text = 'Please wait for the current task to finish.'
 				else:
 					comp_logger.info('here')
 					response_text = 'Processing Starting. We will inform you once completed'
@@ -143,14 +160,14 @@ def bot_response(requests):
 					user_recom_process_id = user_recom_process.id
 					user_recom_process.search_query = requests.session['user_search_term']
 					user_recom_process.initiated = True
-					# user_recom_process.status = 'InProgress'
+					user_recom_process.status = 'InProgress'
 					user_recom_process.save()
 
 					# calling async task
 					comp_logger.info('calling async task handler for recommendation id:{}'.format(user_recom_process_id))
 					start_background_recommendation.delay(user_recom_process_id=user_recom_process_id)
 
-			elif not user_process_running :
+			elif not user_process_running and user_inprogress_process==0:
 				if user_message == 'image provided':
 					response_text = 'Type start to begin'
 					requests.session['user_stage'] = 3
@@ -199,7 +216,7 @@ def upload_image(requests):
 					user_recom_process = user_process_list[0]
 					user_recom_process.search_image = file_name_path
 				user_recom_process.save()
-				comp_logger.info(user_recom_process.save())
+				comp_logger.info('Image Uploaded Successfully')
 									
 				with open(file_name_path, 'wb') as destination:
 					for file_chunk in requests.FILES[files].chunks():

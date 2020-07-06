@@ -187,5 +187,4 @@ class ProcessHandler(object):
 			comp_logger.info('No Results')
 
 
-		# Task completed
-		self.update_project_status('Completed')
+		

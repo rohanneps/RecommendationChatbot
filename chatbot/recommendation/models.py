@@ -36,3 +36,11 @@ def get_initiated_user_process(user):
 	"""
 	user_lookup = (Q(user=user))
 	return Process.objects.filter(status='Pending').filter(user_lookup).distinct().order_by('-id')
+
+
+def get_inprogress_user_process(user):
+	"""
+	Return Running User Process
+	"""
+	user_lookup = (Q(user=user))
+	return Process.objects.filter(status='InProgress').filter(user_lookup).distinct().order_by('-id')
