@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Recommendations List for {{user.username}} | Deakin
+{% endblock %}
+
+
+ {% block content %}
+ <main role="main" class="container">
+      <div class="jumbotron">
+    
+			<div class="searchbox">
+           <p class="lead">
+            <div class="card-header"><h3><b>
+              List Of User Recommendations</h3></b>
+            </div>
+          
+      </p>
+      <div class="col-sm-offset-7" style=" margin-left:63%";>
+      <form method='GET' action=''  class="form-inline my-3 my-lg-0" style="margin-left:25%; margin-top: 10%;">
+              <input type='text' name='q' class="form-control mr-sm-1" placeholder='Search' value='{{ request.GET.q}}' style="border-radius: 4px; height: 30px; width: 200px;">
+              <input type='submit' class="btn btn-info btn-sm" value='Search' style="border-radius: 4px;" />
+      </form>
+      </div></div>
+      <br/>
+      <table class="table">
+        <thead class="thead-dark">
+        <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Search Query</th>
+        <th scope="col">Search Image</th>
+        <th scope="col">Status</th>
+        <th scope="col">Start date</th>
+        <th scope="col">Result</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+        {% for obj in process_list %}
+        <tr>
+          <td>{{obj.id}}</td>
+          <td>{{obj.search_query}}</td>
+          {% with "/"|add:obj.search_image as image_path %}
+          <td> <img src='{{image_path}}' heigth='60' width='100'/></td>
+          {% endwith %}
+          <td>{{obj.status}}</td>
+          <td>{{obj.start_date}}</td>
+          <td>{% ifequal obj.status "Completed" %}
+              <a href="{% url 'recommendation:recommendation_detail' obj.id %}">Check Result</a>
+              {% else %}
+              NA
+              {% endifequal %}
+          </td>
+       </tr>
+        {% endfor %}
+      </tbody>
+      </table>
+      <br/><br/><br/>
+
+      {% if is_paginated %}
+      <div class="col-sm-8 col-sm-offset-2">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q}}{% endif %}">&laquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><a class="page-link" href="">&laquo;</a></li>
+          {% endif %}
+          {% for i in paginator.page_range %}
+            {% if page_obj.number == i %}
+              <li class="page-item active"><a class="page-link">{{ i }} <span class="sr-only">(current)</span></a></li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q}}{% endif %}">&raquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><a class="page-link" href="">&raquo;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    </div></center>
+    {% endif %}
+
+      </div>
+    </main>
+
+{% endblock %}
