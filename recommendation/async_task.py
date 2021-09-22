@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from celery import shared_task,task
-from core.ProcessHandler import ProcessHandler
+from core.process_handler import ProcessHandler
 from recommendation.models import Process
 from chatbot.celery_settings import app as celery_app
 import traceback
