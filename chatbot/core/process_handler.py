@@ -244,7 +244,7 @@ class ProcessHandler:
             self.catalog_df, self.query, "Name"
         )
         self.catalog_df = self.catalog_df.sort_values(
-            by=["TFIDF_COSINE", "Price", "Name"], ascending=True
+            by=["TFIDF_COSINE", "Price", "Name"], ascending=[False, True, True]
         )
 
     def generate_html_response(self) -> None:

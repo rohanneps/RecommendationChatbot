@@ -6,7 +6,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
 from scipy.spatial import distance
-from sklearn.feature_extraction.text import CountVectorizer, Tficatalog_dfTransformer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from django.conf import settings
 
 
@@ -61,7 +61,7 @@ def compute_query_catalog_similarity(
     cnt_vectorizer = vectorizer.fit_transform(all_names)
 
     # TF-Icatalog_df representation
-    tficatalog_df_transformer = Tficatalog_dfTransformer()
+    tficatalog_df_transformer = TfidfTransformer()
     tficatalog_df_transformer.fit(cnt_vectorizer)
 
     # catalog_df['query_string'] = query_string
@@ -101,10 +101,11 @@ def compute_query_catalog_similarity(
     # Compute cosine similarity for each catalog row value
     catalog_df[target_column].apply(get_query_text_similarity)
 
-    catalog_df["q_vs_catalog"] = q_catalog_cosine_sim_list
+    catalog_df["TFIDF_COSINE"] = q_catalog_cosine_sim_list
+    
     del catalog_df[target_column]  # removing temp preprocessed column
     catalog_df["text_match_weightage"] = (
-        catalog_df["q_vs_catalog"].rank(ascending=False).astype(int)
+        catalog_df["TFIDF_COSINE"].rank(ascending=False).astype(int)
     )
     catalog_df["text_match_weightage"] = (
         settings.TEXT_WEIGHTAGE / catalog_df["text_match_weightage"]

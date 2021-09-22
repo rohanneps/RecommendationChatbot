@@ -24,13 +24,13 @@ def get_amazon_serp_catalog(page_content: str, dataframe_headers: list) -> pd.Da
             pandas dataframe containing the AMAZON SERP results for given page source
     """
     soup = BeautifulSoup(page_content, "lxml")
-    serp_list_items = soup.findAll("div", {"data-asin": re.compile(r"^(?!\s*$).+")})
-    serp_list_items_cnt = len(serp_list_items)
-    # print(serp_list_items_cnt)
+    serp_items_list = soup.findAll("div", {"data-asin": re.compile(r"^(?!\s*$).+")})
+    serp_items_list_cnt = len(serp_items_list)
+    # print(serp_items_list_cnt)
 
     amazon_catalog_df = pd.DataFrame(columns=dataframe_headers)
-    if serp_list_items_cnt > 0:
-        for serp_item in serp_list_items:
+    if serp_items_list_cnt > 0:
+        for serp_item in serp_items_list:
             try:
                 prod_dict = {}
                 serp_item_img = serp_item.find("img")["src"]
@@ -76,37 +76,38 @@ def get_google_serp_catalog(page_content: str, dataframe_headers: list) -> pd.Da
 
     soup = BeautifulSoup(page_content, "lxml")
 
-    serp_list_items = soup.findAll("div", {"class": re.compile(r"list-result")})
-    serp_list_items_cnt = len(serp_list_items)
+    serp_items_list = soup.findAll("div", {"class": re.compile(r"list-result")})
+    serp_items_list_cnt = len(serp_items_list)
 
     google_catalog_df = pd.DataFrame(columns=dataframe_headers)
-    # print(serp_list_items_cnt)
+    # print(serp_items_list_cnt)
 
-    if serp_list_items_cnt > 0:
-        for serp_item in serp_list_items:
+    if serp_items_list_cnt > 0:
+        for serp_item in serp_items_list:
+
             prod_dict = {}
             thumbnail_section = serp_item.find(
                 "div", {"class": re.compile(r"thumbnail")}
             )
+
             serp_item_img = thumbnail_section.find("a").find("img")["src"]
             prod_dict[dataframe_headers[2]] = serp_item_img
 
             link_aclk_id = serp_item["data-docid"]
-            serp_item_url = f"https://www.google.com/shopping/product/1\
-            					/specs?prds=pid:{link_aclk_id}"  # spec page url
+            serp_item_url = f"https://www.google.com/shopping/product/1/specs?prds=pid:{link_aclk_id}"  # spec page url
 
             prod_dict[dataframe_headers[1]] = serp_item_url
 
             serp_item_name = thumbnail_section.find_next_sibling("div").find("a").text
             prod_dict[dataframe_headers[0]] = serp_item_name
             serp_price = (
-                thumbnail_section.find_next_sibling("div")
-                .find("div")
-                .find("div")
-                .find_next_sibling("div")
+                thumbnail_section.find_parent("div")
+                .find("div", {"data-sh-or": "price"})
                 .find("span", {"aria-hidden": "true"})
+                .find("span")
                 .text
             )
+
             prod_dict[dataframe_headers[3]] = serp_price
             prod_dict["Platform"] = "Google"
             google_catalog_df = google_catalog_df.append(prod_dict, ignore_index=True)
@@ -130,24 +131,24 @@ def get_ebay_serp_catalog(page_content: str, dataframe_headers: list) -> pd.Data
 
     soup = BeautifulSoup(page_content, "lxml")
 
-    # serp_list_items = soup.findAll('li',{"id" : re.compile(r'srp-river-results-listing')})
+    # serp_items_list = soup.findAll('li',{"id" : re.compile(r'srp-river-results-listing')})
 
     try:
-        serp_list_items = soup.find(
+        serp_items_list = soup.find(
             "ul", {"class": "srp-results srp-grid clearfix"}
         ).findAll("li", recursive=False)
     except:
-        serp_list_items = soup.find(
+        serp_items_list = soup.find(
             "ul", {"class": "srp-results srp-list clearfix"}
         ).findAll("li", recursive=False)
 
-    serp_list_items_cnt = len(serp_list_items)
+    serp_items_list_cnt = len(serp_items_list)
 
     ebay_catalog_df = pd.DataFrame(columns=dataframe_headers)
-    # print(serp_list_items_cnt)
+    # print(serp_items_list_cnt)
 
-    if serp_list_items_cnt > 0:
-        for serp_item in serp_list_items:
+    if serp_items_list_cnt > 0:
+        for serp_item in serp_items_list:
             prod_dict = {}
             thumbnail_section = serp_item.find(
                 "div", {"class": re.compile(r"image-section")}
@@ -171,7 +172,7 @@ def get_ebay_serp_catalog(page_content: str, dataframe_headers: list) -> pd.Data
 
 def get_walmart_serp_catalog(
     page_content: str, dataframe_headers: list
-)-> pd.DataFrame:
+) -> pd.DataFrame:
     """
     Get Walmart SERP pages results in dataframe
 
@@ -186,27 +187,27 @@ def get_walmart_serp_catalog(
     """
 
     soup = BeautifulSoup(page_content, "lxml")
-    serp_list_items = soup.findAll(
+    serp_items_list = soup.findAll(
         "li", {"data-tl-id": re.compile(r"ProductTileGridView")}
     )
-    serp_list_items_cnt = len(serp_list_items)
+    serp_items_list_cnt = len(serp_items_list)
     serp_list_type = 1
 
-    if serp_list_items_cnt == 0:
-        serp_list_items = soup.findAll(
+    if serp_items_list_cnt == 0:
+        serp_items_list = soup.findAll(
             "div", {"data-tl-id": re.compile(r"ProductTileListView")}
         )
         serp_list_type = 2
 
-    serp_list_items_cnt = len(serp_list_items)
+    serp_items_list_cnt = len(serp_items_list)
 
-    # print(serp_list_items_cnt)
+    # print(serp_items_list_cnt)
     # print(serp_list_type)
 
     walmart_catalog_df = pd.DataFrame(columns=dataframe_headers)
     if serp_list_type == 1:
         # type 1 scrapping
-        for serp_item in serp_list_items[: settings.MAX_SERP_LIST_COUNT]:
+        for serp_item in serp_items_list[: settings.MAX_SERP_LIST_COUNT]:
             prod_dict = {}
             thumbnail_section = serp_item.find(
                 "div", {"class": re.compile(r"productimage")}
@@ -254,7 +255,7 @@ def get_walmart_serp_catalog(
 
     else:
         # for type 2 scrapping
-        for serp_item in serp_list_items:
+        for serp_item in serp_items_list:
             prod_dict = {}
             thumbnail_section = serp_item.find(
                 "div", {"class": re.compile(r"list-image-wrapper")}
