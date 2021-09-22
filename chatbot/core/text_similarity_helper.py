@@ -1,60 +1,112 @@
+"""
+Module containing text processing utilities
+"""
 import pandas as pd
-from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
-
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from scipy.spatial import distance
-from sklearn.metrics.pairwise import euclidean_distances
 from nltk.stem.porter import PorterStemmer
+
+from scipy.spatial import distance
+from sklearn.feature_extraction.text import CountVectorizer, Tficatalog_dfTransformer
 from django.conf import settings
 
-stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
+
+STEMMER = PorterStemmer()
+STOP_WORDS = set(stopwords.words("english"))
 
 
+def preprocess(text: str) -> str:
+    """
+    Preprocess text for text vectorization
 
-def preprocess(text):
-	tokenized = text.lower().split()
-	preprocess_tokens = [stemmer.stem(term) for term in tokenized if term not in stop_words]
-	return ' '.join(preprocess_tokens)
+    Args:
+    -----
+            text (str): string to be processed
+    Returns:
+    --------
+            processed string
+    """
+    tokenized = text.lower().split()
+    # stemming and stopwords removal
+    preprocess_tokens = [
+        STEMMER.stem(term) for term in tokenized if term not in STOP_WORDS
+    ]
+    return " ".join(preprocess_tokens)
 
 
-def generateSimilarity(df, query_string, column_to_process):
-	target_column = 'pre_process'
-	df[target_column] = df[column_to_process].apply(preprocess)
+def compute_query_catalog_similarity(
+    catalog_df: pd.DataFrame, query_string: str, column_to_process: str
+) -> pd.DataFrame:
+    """
+    Compute Cosine Similarity between query and each SERP catalog catalog_df target columns
 
-	all_names = [query_string] + df[target_column].tolist()
+    Args:
+    -----
+            catalog_df (pd.DataFrame): dataframe containing the SERP results
+            query_string (str): query string used for SERP
+            columns_to_process(str): column of the catalog df whose values
+                                                            are to be compared with query string
 
-	# BOW representation
-	vectorizer = CountVectorizer()
-	cnt_vectorizer = vectorizer.fit_transform(all_names)
+    Returns:
+    --------
+            Pandas DataFrame containing the computed results sorted by similarity
+    """
 
-	# TF-IDF representation
-	tfidf_transformer = TfidfTransformer()
-	tfidf_transformer.fit(cnt_vectorizer)
+    target_column = "pre_process"
+    catalog_df[target_column] = catalog_df[column_to_process].apply(preprocess)
 
-	# df['query_string'] = query_string
+    all_names = [query_string] + catalog_df[target_column].tolist()
 
-	# text embedding for search query
-	q_string_cnt_vector = vectorizer.transform([query_string])
-	q_string_tfidf_vector = tfidf_transformer.transform(q_string_cnt_vector)
+    # BOW representation
+    vectorizer = CountVectorizer()
+    cnt_vectorizer = vectorizer.fit_transform(all_names)
 
-	TFIDF_COSINE = []
+    # TF-Icatalog_df representation
+    tficatalog_df_transformer = Tficatalog_dfTransformer()
+    tficatalog_df_transformer.fit(cnt_vectorizer)
 
-	def getTextSimilarity(result_name):
-		nonlocal q_string_tfidf_vector
-		result_string_cnt_vector = vectorizer.transform([result_name])
-		result_string_tfidf_vector = tfidf_transformer.transform(result_string_cnt_vector)
+    # catalog_df['query_string'] = query_string
 
-		# TFIDF Cosine
-		tfidf_cosine = distance.cosine(q_string_tfidf_vector[0].toarray(),result_string_tfidf_vector[0].toarray())
-		TFIDF_COSINE.append(tfidf_cosine)
+    # text embedding for search query
+    q_string_cnt_vector = vectorizer.transform([query_string])
+    q_string_tficatalog_df_vector = tficatalog_df_transformer.transform(
+        q_string_cnt_vector
+    )
 
-	df[target_column].apply(getTextSimilarity)
+    q_catalog_cosine_sim_list = []
 
-	df['TFIDF_COSINE'] = TFIDF_COSINE
-	del df[target_column]			# removing temp preprocessed column
-	df['text_match_weightage'] = df['TFIDF_COSINE'].rank(ascending=True).astype(int)
-	df['text_match_weightage'] = settings.TEXT_WEIGHTAGE/df['text_match_weightage']
-	return df
+    def get_query_text_similarity(result_name: str) -> None:
+        """
+        Compute cosine similarity between query and individual catalog value
 
+        Args:
+        -----
+                result_name (str): catalog value to be compared with
+        Returns:
+        --------
+                None
+        """
+        nonlocal q_string_tficatalog_df_vector
+        result_string_cnt_vector = vectorizer.transform([result_name])
+        result_string_tficatalog_df_vector = tficatalog_df_transformer.transform(
+            result_string_cnt_vector
+        )
+
+        # Compute pair-wise cosine similarity
+        q_catalog_cosine_sim = 1 - distance.cosine(
+            q_string_tficatalog_df_vector[0].toarray(),
+            result_string_tficatalog_df_vector[0].toarray(),
+        )
+        q_catalog_cosine_sim_list.append(q_catalog_cosine_sim)
+
+    # Compute cosine similarity for each catalog row value
+    catalog_df[target_column].apply(get_query_text_similarity)
+
+    catalog_df["q_vs_catalog"] = q_catalog_cosine_sim_list
+    del catalog_df[target_column]  # removing temp preprocessed column
+    catalog_df["text_match_weightage"] = (
+        catalog_df["q_vs_catalog"].rank(ascending=False).astype(int)
+    )
+    catalog_df["text_match_weightage"] = (
+        settings.TEXT_WEIGHTAGE / catalog_df["text_match_weightage"]
+    )
+    return catalog_df

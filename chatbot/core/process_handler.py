@@ -15,13 +15,14 @@ from django.conf import settings
 
 from helpers import helper
 from .generate_html import get_html_from_dataframe
-from .ImageSimilarity import ImageSimilarity
+from .image_similarity_helper import ImageSimilarity
+from .text_similarity_helper import compute_query_catalog_similarity
+
 from .serp_helper import (
-    getAmazonSerpCatalog,
-    getGoogleSerpCatalog,
-    getEbaySerpCatalog,
+    get_amazon_serp_catalog,
+    get_google_serp_catalog,
+    get_ebay_serp_catalog,
 )
-from .text_similarity_helper import generateSimilarity
 
 
 warnings.filterwarnings("ignore")
@@ -127,7 +128,7 @@ class ProcessHandler:
         amazon_page_source = self.driver_get_page_source(
             amazon_q_string, amazon_file_path
         )
-        amazon_catalog_df = getAmazonSerpCatalog(
+        amazon_catalog_df = get_amazon_serp_catalog(
             amazon_page_source, settings.SERP_PRODUCT_CATALOG_HEADERS
         )
         self.catalog_df = self.catalog_df.append(amazon_catalog_df)
@@ -139,7 +140,7 @@ class ProcessHandler:
         google_page_source = self.driver_get_page_source(
             google_q_string, google_file_path
         )
-        google_catalog_df = getGoogleSerpCatalog(
+        google_catalog_df = get_google_serp_catalog(
             google_page_source, settings.SERP_PRODUCT_CATALOG_HEADERS
         )
         self.catalog_df = self.catalog_df.append(google_catalog_df)
@@ -148,7 +149,7 @@ class ProcessHandler:
         ebay_file_path = os.path.join(self.page_source_dir, settings.EBAY_PAGE_SOURCE)
         ebay_page_source = self.driver_get_page_source(ebay_q_string, ebay_file_path)
         try:
-            ebay_catalog_df = getEbaySerpCatalog(
+            ebay_catalog_df = get_ebay_serp_catalog(
                 ebay_page_source, settings.SERP_PRODUCT_CATALOG_HEADERS
             )
             self.catalog_df = self.catalog_df.append(ebay_catalog_df)
@@ -239,7 +240,9 @@ class ProcessHandler:
                 None
         """
         comp_logger.info("Computing product name similarity")
-        self.catalog_df = generateSimilarity(self.catalog_df, self.query, "Name")
+        self.catalog_df = compute_query_catalog_similarity(
+            self.catalog_df, self.query, "Name"
+        )
         self.catalog_df = self.catalog_df.sort_values(
             by=["TFIDF_COSINE", "Price", "Name"], ascending=True
         )
