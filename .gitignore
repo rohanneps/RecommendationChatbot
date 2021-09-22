@@ -9,6 +9,8 @@
 **/*.jpeg
 **/*.jpg
 **/*.png
+!images/samples.png
+!images/samples.png
 **/*.log
 **/logs
 **/media
