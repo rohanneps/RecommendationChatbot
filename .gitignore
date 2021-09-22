@@ -8,9 +8,11 @@
 **/env
 **/*.jpeg
 **/*.jpg
+
 **/*.png
-!./images/sample1.png
-!./images/sample2.png
+!samples/sample1.png
+!samples/sample2.png
+
 **/*.log
 **/logs
 **/media

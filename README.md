@@ -16,9 +16,9 @@ This project is a chatbot that recommends products from the **SERP** (Search Eng
 
 
 ## Sample
-![Sample1](./images/sample1.png)
+![Sample1](./samples/sample1.png)
 
-![Sample2](./images/sample2.png)
+![Sample2](./samples/sample2.png)
 
 
 ## Installation
